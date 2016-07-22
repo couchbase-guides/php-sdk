@@ -1,0 +1,119 @@
+---
+tags: [php-sdk]
+---
+:toc:
+:icons: font
+:source-highlighter: prettify
+:project_id: php-sdk
+
+WARNING: Work in progress
+
+This guide explains how to use http://developer.couchbase.com/documentation/server/current/sdk/php/start-using-sdk.html[Couchbase PHP SDK] to store and retrieve a JSON document in http://developer.couchbase.com/server[Couchbase].
+
+== What you'll build
+
+Couchbase is an open source NoSQL document database. It can be programmed using a variety of languages. This guide will show how to write a simple PHP application to store a JSON document representing a Book JSON document in Couchbase Server using the Couchbase PHP SDK.
+
+== What you'll need
+
+* 15-30 minutes
+* A PHP code editor
+* http://www.couchbase.com/nosql-databases/downloads[Couchbase Server 4.5+]
+
+== Setup
+
+=== Install and Start Couchbase
+
+Install and start Couchbase for your operating system as explained at: http://developer.couchbase.com/documentation/server/current/getting-started/installing.html. A default bucket by the name `default` is created.
+
+Open up Couchbase Web Console at http://localhost:8091, go to the Query tab, create a primary index using `CREATE PRIMARY INDEX on default` and click on Execute button to create the index.
+
+=== Install PHP Client SDK
+
+Couchbase PHP Client SDK can be installed on different operating systems. Complete set of instructions are available at http://developer.couchbase.com/documentation/server/current/sdk/php/start-using-sdk.html. OSX specific instructions are given below.
+
+Installing PHP Client SDK on OSX requires to install brew package manager. This in turn requires to install XCode and the process could take a few minutes depending upon your connectivity.
+
+. Download and Install https://itunes.apple.com/au/app/xcode/id497799835?mt=12[XCode].
+. Install the XCode CLI tools as `xcode-select --install`.
+. Install `brew` package manager as:
++
+```
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+brew doctor
+```
++
+. Now you are ready to install Couchbase PHP libraries:
++
+```
+brew install libcouchbase
+```
++
+. PHP interpreter needs to be configured to load the Couchbase SDK as an extension. This needs to be done in the standard PHP configuration file - `php.ini`. The exact location of this file can be found using `php --ini` command. This shows the output as:
++
+```
+Configuration File (php.ini) Path: /etc
+Loaded Configuration File:         /etc/php.ini
+Scan for additional .ini files in: /Library/Server/Web/Config/php
+Additional .ini files parsed:      (none)
+```
++
+The second line shows the location of the configuration file. In our case, the value is `/etc/php.ini`. If `(none)` value is shown then that means no configuration file exists. Typically, a default file such as `/etc/php.ini.default` can be copied over to `/etc/php.ini` in this case.
+
+== Code
+
+== Create Application
+
+In your favorite editor, create a new file `app.php`. Copy the following code in that file:
+
+[source,php]
+----
+ADD CODE
+----
+
+Couchbase Go library, defined by `gopkg.in/couchbase/gocb.v1` is used in this class.
+
+A new Go struct named `Book` is defined that mimics the JSON document structure. `Connect` method creates a connection to the Couchbase node identified by `localhost`. The `default` bucket is opened using the `OpenBucket` method.
+
+A JSON document is upserted in the bucket. The word `"Upsert"` comes from `"update"` and `"insert"`. So this method will either insert the document if it does not exist, or update if it already exists. A fresh install of Couchbase has an empty `default` bucket. So the document will be inserted for the first run. Subsequent runs of this application will update the document.
+
+A key is given to identify the document, this is `book1` in our case. The document itself is the JSON fragment and is second parameter of the method.
+
+The inserted document can be easily accessed using `bucket.Get()` method by passing the key used during the creation. Value of the document can be retrieved using `.value`.
+
+All documents from the bucket can be easily retrieved using http://couchbase.com/n1ql[N1QL] query as well.
+
+== Run
+
+=== Build Application
+
+Open a terminal or command prompt and give the following command to build the application:
+
+```
+go buid app.go
+```
+
+This will compile the source code and generate the binary file.
+
+=== Run Application
+
+In the same directory, run the application by giving the command:
+
+```
+app
+```
+
+It will show the output as:
+
+[source, text]
+----
+Book: {978-1-4919-1889-0 Minecraft Modding with Forge 29.99}
+Row: map[default:map[name:Minecraft Modding with Forge cost:29.99 isbn:978-1-4919-1889-0]]
+----
+
+The first result comes from `bucket.Get("u:book1", &inBook)` method. The second line comes from executing the N1QL query and iterating over all the documents.
+
+== Summary
+
+Congratulations! You set up a Couchbase server and wrote a simple Go application that stores and retrieves a JSON document in Couchbase.
+
